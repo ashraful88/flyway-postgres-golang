@@ -22,5 +22,5 @@ PgAdmin http://localhost:8080/
  
 Create .env file like example.env
 
-    `docker build -t flywayk8 .`
-    `docker run flywayk8:latest`
+   `docker build -t flywayk8 .`
+   `docker run flywayk8:latest`
