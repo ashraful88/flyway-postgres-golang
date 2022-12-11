@@ -1,10 +1,41 @@
-FROM flyway/flyway:7.0-alpine AS migrator
+#####################################
+#   STEP 1: build golang executable #
+#####################################
+FROM golang:1.19-alpine3.16 AS build
 
-COPY .env /flyway/.env
-COPY ./run_migration.sh /flyway/run_migration.sh
-COPY ./sql/ /flyway/sql/
+#ENV GO111MODULE on
+RUN mkdir -p /etc/secret/
+COPY  .env /etc/secret/.env
 
-USER root
-RUN chmod +x /flyway/run_migration.sh
-RUN cat /flyway/run_migration.sh
-ENTRYPOINT ["/flyway/run_migration.sh"]
+ARG ENV
+ENV ENV $ENV
+
+WORKDIR /go/cache
+
+ADD go.mod .
+ADD go.sum .
+RUN go mod download
+
+WORKDIR /go/release
+
+ADD . .
+
+RUN CGO_ENABLED=0 go build -a -o main
+
+#####################################
+#   STEP 2 build flyway image      #
+#####################################
+FROM flyway/flyway:8-alpine
+
+COPY .env /app/.env
+COPY . /app
+RUN cd /app/flyway/sql && ls
+
+ENV FLYWAY_LOCATIONS filesystem:/app/flyway/sql
+
+COPY --from=build /go/release/main /app/main
+
+WORKDIR /app/
+RUN chmod +x /app/main
+ENTRYPOINT ["./main"]
+

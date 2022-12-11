@@ -2,9 +2,9 @@
 
 echo "exporting envs"
 
-if [ -f /flyway/.env ]
+if [ -f .env ]
 then
-  export $(cat /flyway/.env | sed 's/#.*//g' | xargs)
+  export $(cat .env | sed 's/#.*//g' | xargs)
 fi
 
-flyway migrate -url=jdbc:postgresql://$POSTGRES_HOST_PORT/$POSTGRES_DB -user=$POSTGRES_USER -password=$POSTGRES_PASSWORD -connectRetries=60
+docker run --rm --network flyway-postgres-golang_flynet -v $PWD/sql:/flyway/sql flyway/flyway -url=jdbc:postgresql://$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB -user=$POSTGRES_USER -password=$POSTGRES_PASSWORD -connectRetries=60 migrate

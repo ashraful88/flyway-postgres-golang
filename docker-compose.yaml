@@ -1,8 +1,10 @@
 version: '3'
 
 services:
+
   flyway:
     image: flyway/flyway
+    container_name: flyway
     volumes:
       - "./sql:/flyway/sql"
     command: -url=jdbc:postgresql://pgdb/${POSTGRES_DB} -user=${POSTGRES_USER} -password=${POSTGRES_PASSWORD} -connectRetries=60 migrate
@@ -24,6 +26,7 @@ services:
       - "./data:/var/lib/postgresql/data"
     networks:
       - flynet
+
   pg-admin:
     image: dpage/pgadmin4
     restart: always
@@ -37,5 +40,5 @@ services:
     depends_on:
       - pgdb
 
-networks: 
+networks:
   flynet:
