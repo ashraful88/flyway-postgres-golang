@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"flyway-postgres-golang/config"
-	"flyway-postgres-golang/flyway"
+	"github.com/ashraful88/flyway-postgres-golang/config"
+	"github.com/ashraful88/flyway-postgres-golang/flyway"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"

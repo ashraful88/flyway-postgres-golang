@@ -58,3 +58,13 @@ Create a .env file like example.env
 
    `docker build -t flywayk8 .`
    `docker run flywayk8:latest`
+
+
+
+## Create project with gonew
+
+Install gonew if not installed already
+`go install golang.org/x/tools/cmd/gonew@latest`
+
+create a new project with gonew with your project name
+`gonew github.com/ashraful88/flyway-postgres-golang example.com/yourproject`
