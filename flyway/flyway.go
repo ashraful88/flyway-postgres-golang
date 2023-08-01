@@ -5,15 +5,19 @@ import (
 	"os/exec"
 )
 
-func CreateConnectionString(dbHost, dbPort, dbName, dbUser, dbPass, sqlLoc string, retries int64) string {
-	if retries == 0 {
-		retries = 60
+// CreateConnectionString creates connection string for flyway
+func CreateConnectionString(dbHost, dbPort, dbName, dbUser, dbPass, schemas, sqlLoc, retries string) string {
+	if retries == "" {
+		retries = "60"
+	}
+	if schemas == "" {
+		schemas = "public"
 	}
 	if sqlLoc == "" {
 		sqlLoc = "filesystem:/flyway/sql"
 	}
-	return fmt.Sprintf("-url=jdbc:postgresql://%s:%s/%s -user=%s -password=%s -connectRetries=%d -locations='%s'",
-		dbHost, dbPort, dbName, dbUser, dbPass, retries, sqlLoc)
+	return fmt.Sprintf(`-url=jdbc:postgresql://%s:%s/%s -user=%s -password=%s -schemas="%s" -connectRetries=%s -locations='%s'`,
+		dbHost, dbPort, dbName, dbUser, dbPass, schemas, retries, sqlLoc)
 }
 
 // Info get current migration version info

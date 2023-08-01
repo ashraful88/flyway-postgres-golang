@@ -1,0 +1,144 @@
+run:
+  concurrency: 8
+  issues-exit-code: 0
+  tests: true
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  gocognit:
+    min-complexity: 15
+  gocritic:
+    enabled-checks:
+      - appendCombine
+      - badCall
+      - badCond
+      - boolExprSimplify
+      - codegenComment
+      - commentFormatting
+      - commentedOutCode
+      - deprecatedComment
+      - dupImport
+      - emptyFallthrough
+      - emptyStringTest
+      - equalFold
+      - evalOrder
+      - exitAfterDefer
+      - flagName
+      - hexLiteral
+      - indexAlloc
+      - initClause
+      - methodExprCall
+      - nestingReduce
+      - newDeref
+      - nilValReturn
+      - offBy1
+      - ptrToRefParam
+      - rangeExprCopy
+      - regexpPattern
+      - sloppyReassign
+      - stringXbytes
+      - truncateCmp
+      - typeAssertChain
+      - typeUnparen
+      - underef
+      - unnecessaryBlock
+      - valSwap
+      - weakCond
+      - wrapperFunc
+      - yodaStyleExpr
+  govet:
+    check-shadowing: false
+  nolintlint:
+    require-explanation: true
+    require-specific: true
+  depguard:
+    rules:
+      logger:
+        deny:
+          # logging is allowed only by logutils.Log,
+          # logrus is allowed to use only in logutils package.
+          - pkg: "github.com/sirupsen/logrus"
+            desc: logging is allowed only by logutils.Log
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - unused
+    - depguard
+    - dogsled
+    - dupl
+    - errcheck
+    - exportloopref
+    - exhaustive
+    - goconst
+    - gocritic
+    - gofmt
+    - goimports
+    - gomnd
+    - gocyclo
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - nolintlint
+    - nakedret
+    - prealloc
+    - predeclared
+    - revive
+    - staticcheck
+    - stylecheck
+    - thelper
+    - tparallel
+    - typecheck
+    - unconvert
+    - unparam
+    - whitespace
+  fast: false
+
+issues:
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    - linters:
+        - ineffassign
+      text: ineffectual assignment to
+    - linters:
+        - gosec
+      text: "G204: Subprocess launched with a potential tainted input or cmd arguments"
+    - linters:
+        - golint
+      text: "don't use ALL_CAPS in Go names; use CamelCase"
+    - linters:
+        - golint
+      text: "don't use an underscore in package name"
+    - path: ".*_test.go"
+      linters:
+        - bodyclose
+        - funlen
+        - gocognit
+        - goconst
+    - path: ".*_test.go"
+      text: "Error return value is not checked"
+      linters:
+        - errcheck
+    - path: ".*_test.go"
+      text: "regexpMust"
+      linters:
+        - errcheck
+        - gocritic
+    - text: "commentedOutCode: may want to remove commented-out code"
+      linters:
+        - gocritic
+    - text: "commentFormatting: put a space between `//` and comment text"
+      linters:
+        - gocritic
