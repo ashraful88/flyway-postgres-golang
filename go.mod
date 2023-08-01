@@ -1,4 +1,4 @@
-module flyway-postgres-golang
+module github.com/ashraful88/flyway-postgres-golang
 
 go 1.20
 
