@@ -42,6 +42,9 @@ Delete everything in the database and migrate fresh
 For production, Use Dockerfile. 
 Set ENV var to `production` in .env
 
+In production database migration will be executed from Golang.
+Note that during CI/CD process database may not be accessible but once docker image is built and deploy to Kubernetes pods or any other environment database will be accessible for migration.
+
 In ./flyway/flyway.go flyway migration-related functions are added. Migration is triggered from the main.go file. 
 Docker image flyway/flyway:8-alpine will run Golang binary and database migration.
 

@@ -5,22 +5,35 @@ import (
 	"net/http"
 	"os"
 
+	"flyway-postgres-golang/config"
 	"flyway-postgres-golang/flyway"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	env, _ := os.LookupEnv("ENV")
-	ApiPort, _ := os.LookupEnv("API_PORT")
 	dbHost, _ := os.LookupEnv("POSTGRES_HOST")
 	dbPort, _ := os.LookupEnv("POSTGRES_PORT")
 	dbName, _ := os.LookupEnv("POSTGRES_DB")
 	dbUser, _ := os.LookupEnv("POSTGRES_USER")
 	dbPass, _ := os.LookupEnv("POSTGRES_PASSWORD")
 
+	// load .env file
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Print("Error loading primary .env file")
+	}
+	// get env from .env file
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "local"
+	}
+	// load configs non based on env
+	config.Conf = config.GetConfigByEnv(env)
+
 	if env != "local" {
-		cs := flyway.CreateConnectionString(dbHost, dbPort, dbName, dbUser, dbPass, "filesystem:/flyway/sql", 60)
+		cs := flyway.CreateConnectionString(dbHost, dbPort, dbName, dbUser, dbPass, config.Conf.FlywayDBSchemas, config.Conf.FlywayLocations, config.Conf.FlywayConnRetry)
 
 		// wipe all database schema and data
 		/* res, err := flyway.Clean(cs)
@@ -50,10 +63,11 @@ func main() {
 		context.Writer.Header().Set("Content-Type", "application/json; charset=latin-1")
 		context.Next()
 	})
+	_ = r.SetTrustedProxies(nil)
 
 	r.GET("/health", HealthCheck)
 
-	err := r.Run(":" + ApiPort)
+	err = r.Run(":" + config.Conf.APIPort)
 	if err != nil {
 		panic(err)
 	}

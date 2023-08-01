@@ -4,9 +4,13 @@ services:
 
   flyway:
     image: flyway/flyway
-    container_name: flyway
+    #container_name: flyway
     volumes:
       - "./sql:/flyway/sql"
+    environment:
+      - FLYWAY_CONNECT_RETRIES=60
+      - FLYWAY_LOCATIONS=filesystem:/flyway/sql
+      - FLYWAY_SCHEMAS=${FLYWAY_SCHEMAS}
     command: -url=jdbc:postgresql://pgdb/${POSTGRES_DB} -user=${POSTGRES_USER} -password=${POSTGRES_PASSWORD} -connectRetries=60 migrate
     depends_on:
       - pgdb

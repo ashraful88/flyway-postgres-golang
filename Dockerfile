@@ -29,9 +29,6 @@ FROM flyway/flyway:8-alpine
 
 COPY .env /app/.env
 COPY . /app
-RUN cd /app/flyway/sql && ls
-
-ENV FLYWAY_LOCATIONS filesystem:/app/flyway/sql
 
 COPY --from=build /go/release/main /app/main
 
