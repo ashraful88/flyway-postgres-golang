@@ -3,13 +3,14 @@ version: '3'
 services:
 
   flyway:
-    image: flyway/flyway
+    image: flyway/flyway:9
     #container_name: flyway
+    platform: linux/amd64
     volumes:
-      - "./sql:/flyway/sql"
+      - "./sql:/app/sql"
     environment:
       - FLYWAY_CONNECT_RETRIES=60
-      - FLYWAY_LOCATIONS=filesystem:/flyway/sql
+      - FLYWAY_LOCATIONS=filesystem:/app/sql
       - FLYWAY_SCHEMAS=${FLYWAY_SCHEMAS}
     command: -url=jdbc:postgresql://pgdb/${POSTGRES_DB} -user=${POSTGRES_USER} -password=${POSTGRES_PASSWORD} -connectRetries=60 migrate
     depends_on:

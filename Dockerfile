@@ -1,7 +1,7 @@
 #####################################
 #   STEP 1: build golang executable #
 #####################################
-FROM golang:1.19-alpine3.16 AS build
+FROM golang:1.20-alpine3.18 AS build
 
 #ENV GO111MODULE on
 RUN mkdir -p /etc/secret/
@@ -25,10 +25,12 @@ RUN CGO_ENABLED=0 go build -a -o main
 #####################################
 #   STEP 2 build flyway image      #
 #####################################
-FROM flyway/flyway:8-alpine
+FROM flyway/flyway:9-alpine
 
 COPY .env /app/.env
 COPY . /app
+
+ENV FLYWAY_LOCATIONS filesystem:/app/sql
 
 COPY --from=build /go/release/main /app/main
 
