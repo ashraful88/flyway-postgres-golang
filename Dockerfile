@@ -1,7 +1,7 @@
 #####################################
 #   STEP 1: build golang executable #
 #####################################
-FROM golang:1.20-alpine3.18 AS build
+FROM golang:1.25-alpine3.18 AS build
 
 #ENV GO111MODULE on
 RUN mkdir -p /etc/secret/

@@ -13,17 +13,18 @@ import (
 )
 
 func main() {
+	// load .env file
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Print("Error loading primary .env file")
+	}
+
 	dbHost, _ := os.LookupEnv("POSTGRES_HOST")
 	dbPort, _ := os.LookupEnv("POSTGRES_PORT")
 	dbName, _ := os.LookupEnv("POSTGRES_DB")
 	dbUser, _ := os.LookupEnv("POSTGRES_USER")
 	dbPass, _ := os.LookupEnv("POSTGRES_PASSWORD")
 
-	// load .env file
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Print("Error loading primary .env file")
-	}
 	// get env from .env file
 	env := os.Getenv("ENV")
 	if env == "" {
@@ -46,6 +47,7 @@ func main() {
 		res, err := flyway.Migrate(cs)
 		if err != nil {
 			log.Println("Flyway DB Migration Failed", err)
+			// shutdown here if migration fails is deal breaker
 		}
 
 		log.Println("flyway Migrate", res)
@@ -60,7 +62,7 @@ func main() {
 	r.Use(func(context *gin.Context) {
 		context.Writer.Header().Add("Access-Control-Allow-Methods", "*")
 		context.Writer.Header().Add("Access-Control-Allow-Headers", "*")
-		context.Writer.Header().Set("Content-Type", "application/json; charset=latin-1")
+		context.Writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 		context.Next()
 	})
 	_ = r.SetTrustedProxies(nil)

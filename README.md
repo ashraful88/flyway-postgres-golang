@@ -1,70 +1,137 @@
-# Flywaydb PostgreSQL Golang boilerplate  
+# Flywaydb PostgreSQL Golang boilerplate
 
-Use Flyway(https://github.com/flyway/flyway) database schema migration tool with any Golang project.  
+Use [Flyway](https://github.com/flyway/flyway) database schema migration tool with any Golang project.
 
-This repo uses PostgreSQL but can be used for any SQL database that flyway supports
+This repo uses PostgreSQL but can be used for any SQL database that Flyway supports.
 
-Read more about versioning SQL files
+Read more about versioning SQL files:
 https://flywaydb.org/documentation/concepts/migrations.html#naming
+
+## Prerequisites
+
+- Go 1.20+
+- Docker and Docker Compose
 
 ## Add database schema files
 
-Add your .sql files in ./sql
-Use the samvar version in the filename
-example: V1.1__anyname.sql V1.2__secondfile.sql
+Add your .sql files in `./sql` directory.
+Use semver versioning in the filename.
 
-## Running flyway in a local development environment
+Example: `V1.1__anyname.sql`, `V1.2__secondfile.sql`
 
-You need a local installation of Golang and Docker.
+## Running Flyway in a local development environment
 
-Create .env from example.env
+1. Create `.env` from `example.env`:
+   ```bash
+   cp example.env .env
+   ```
 
-Run docker containers, this will create a local PostgreSQL (you can update docker-compose.yaml to use any database) docker container and another docker container will run flyway migration to Postgres. There is a container for PgAdmin(UI tool for Postgres) URL http://localhost:8080/browser/
+2. Start Docker containers (PostgreSQL, Flyway, and PgAdmin):
+   ```bash
+   make run-docker
+   # or
+   docker-compose up -d
+   ```
 
- `docker-compose up -d`
+   This creates:
+   - PostgreSQL database container
+   - Flyway container that runs migrations automatically
+   - PgAdmin UI at http://localhost:8080/browser/
 
-Check migration status `docker logs flyway`
+3. Check migration status:
+   ```bash
+   docker logs flyway-postgres-golang-flyway-1
+   ```
 
-If migration is successful then it's ready to work with Golang local installation.
+4. Run the Go application locally:
+   ```bash
+   make run
+   ```
 
-Run migration after changes are made in the SQL file.
+### Run migrations manually after SQL changes
 
-`docker run --rm --network flyway-postgres-golang_flynet -v $PWD/sql:/flyway/sql flyway/flyway -url=jdbc:postgresql://$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB -user=$POSTGRES_USER -password=$POSTGRES_PASSWORD -connectRetries=60 migrate`
+```bash
+make run-migrate
+```
 
-Delete everything in the database and migrate fresh
+Or run directly with Docker:
 
-`docker run --rm --network flyway-postgres-golang_flynet -v $PWD/sql:/flyway/sql flyway/flyway -url=jdbc:postgresql://$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB -user=$POSTGRES_USER -password=$POSTGRES_PASSWORD -connectRetries=60 clean migrate`
+```bash
+source .env
+docker run --rm \
+  --network flyway-postgres-golang_flynet \
+  -v $PWD/sql:/flyway/sql \
+  flyway/flyway:9 \
+  -url=jdbc:postgresql://pgdb:5432/$POSTGRES_DB \
+  -user=$POSTGRES_USER \
+  -password=$POSTGRES_PASSWORD \
+  -connectRetries=60 \
+  migrate
+```
 
+### Reset database and migrate fresh
 
+```bash
+source .env
+docker run --rm \
+  --network flyway-postgres-golang_flynet \
+  -v $PWD/sql:/flyway/sql \
+  flyway/flyway:9 \
+  -url=jdbc:postgresql://pgdb:5432/$POSTGRES_DB \
+  -user=$POSTGRES_USER \
+  -password=$POSTGRES_PASSWORD \
+  -connectRetries=60 \
+  clean migrate
+```
 
-## Running flyway in the production environment
+### Stop containers
 
-For production, Use Dockerfile. 
-Set ENV var to `production` in .env
+```bash
+make run-docker-down
+# or
+docker-compose down
+```
 
-In production database migration will be executed from Golang.
-Note that during CI/CD process database may not be accessible but once docker image is built and deploy to Kubernetes pods or any other environment database will be accessible for migration.
+## Running Flyway in the production environment
 
-In ./flyway/flyway.go flyway migration-related functions are added. Migration is triggered from the main.go file. 
-Docker image flyway/flyway:8-alpine will run Golang binary and database migration.
+For production, use the Dockerfile. Set `ENV=production` in your environment.
 
+In production, database migration is executed from the Go application on startup. Note that during CI/CD the database may not be accessible, but once the Docker image is deployed to Kubernetes or another environment, the database will be accessible for migration.
 
+Migration functions are defined in `./flyway/flyway.go` and triggered from `main.go`. The Docker image uses `flyway/flyway:9-alpine` as the base image to run both the Go binary and database migrations.
 
+## Run Flyway using Dockerfile only
 
+1. Create a `.env` file from `example.env`
 
-## Run flyway using Dockerfile only
- 
-Create a .env file like example.env
+2. Build and run:
+   ```bash
+   docker build -t flywayk8 .
+   docker run --env-file .env flywayk8:latest
+   ```
 
-   `docker build -t flywayk8 .`
-   `docker run flywayk8:latest`
+## Available Make commands
 
-
+| Command | Description |
+|---------|-------------|
+| `make run` | Run the Go server locally |
+| `make run-docker` | Start Docker containers |
+| `make run-docker-down` | Stop Docker containers |
+| `make run-migrate` | Run database migrations |
+| `make run-linter` | Run golangci-lint |
+| `make run-test` | Run tests |
+| `make run-test-coverage` | Run tests with coverage |
 
 ## Create project with gonew
 
-Install gonew if not installed already
-`go install golang.org/x/tools/cmd/gonew@latest`
+Install gonew if not already installed:
 
-create a new project with gonew with your project name
-`gonew github.com/ashraful88/flyway-postgres-golang example.com/yourproject`
+```bash
+go install golang.org/x/tools/cmd/gonew@latest
+```
+
+Create a new project with your project name:
+
+```bash
+gonew github.com/ashraful88/flyway-postgres-golang example.com/yourproject
+```

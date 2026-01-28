@@ -1,6 +1,6 @@
 module github.com/ashraful88/flyway-postgres-golang
 
-go 1.20
+go 1.25
 
 require (
 	github.com/gin-gonic/gin v1.9.1
